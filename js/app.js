@@ -1,7 +1,7 @@
 // js/app.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 0. Función de Fisher–Yates para desordenar un array
+  // 0. Fisher–Yates shuffle
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -10,14 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return array;
   }
 
-  // 1. Generar y barajar IDs del 1 al 20
+  // 1. Barajar IDs del 1 al 20
   const ids = shuffle(Array.from({ length: 20 }, (_, i) => i + 1));
 
-  // 2. Seleccionar y limpiar el contenedor
+  // 2. Renderizar tarjetas
   const container = document.getElementById('cards-container');
-  container.innerHTML = '';
+  container.innerHTML = ''; // limpiamos cualquier contenido
 
-  // Opciones para fase narrativa
   const fasesOptions = [
     'Situación inicial',
     'Conflicto',
@@ -25,17 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     'Resolución',
     'Situación final'
   ];
+  const optionsHTML = fasesOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('');
 
-  // 3. Renderizar tarjetas usando el array mezclado
   ids.forEach(id => {
     const div = document.createElement('div');
     div.className = 'card';
     div.dataset.id = id;
-
-    const optionsHTML = fasesOptions
-      .map(opt => `<option value="${opt}">${opt}</option>`)  
-      .join('');
-
     div.innerHTML = `
       <div class="card-header">
         <span class="drag-handle">☰</span>
@@ -51,50 +45,47 @@ document.addEventListener('DOMContentLoaded', () => {
     container.appendChild(div);
   });
 
-  // 4. Inicializar Sortable.js y actualizar badges
+  // 3. Sortable.js + badges
   function updateBadges() {
-    Array.from(container.children).forEach((card, index) => {
-      card.querySelector('.badge').textContent = index + 1;
+    Array.from(container.children).forEach((card, i) => {
+      card.querySelector('.badge').textContent = i + 1;
     });
   }
-
   new Sortable(container, {
     handle: '.drag-handle',
     draggable: '.card',
     animation: 150,
     onUpdate: updateBadges,
     onStart: ({ item }) => item.classList.add('dragging'),
-    onEnd: ({ item }) => item.classList.remove('dragging'),
+    onEnd:   ({ item }) => item.classList.remove('dragging'),
   });
   updateBadges();
 
-  // 5. Validación de inputs y gestión de estado del botón
+  // 4. Validación y botón
   const btn = document.getElementById('generate-btn');
-  
+  btn.disabled = true;  // ← inicialmente siempre deshabilitado
+
   function validateAll() {
-    const faseValid = Array.from(container.querySelectorAll('select[name=fase]'))
+    const fasesOK = Array.from(container.querySelectorAll('select[name=fase]'))
       .every(sel => sel.value.trim() !== '');
-    const descValid = Array.from(container.querySelectorAll('textarea[name=descripcion]'))
+    const descOK  = Array.from(container.querySelectorAll('textarea[name=descripcion]'))
       .every(txt => txt.value.trim() !== '');
-    return faseValid && descValid;
+    return fasesOK && descOK;
   }
 
-  // Estado inicial del botón
-  btn.disabled = !validateAll();
-
-  // Escucha para habilitar/deshabilitar al cambiar inputs
+  // Solo el listener de input habilita el botón cuando corresponda
   container.addEventListener('input', () => {
     btn.disabled = !validateAll();
   });
 
-  // 6. Envío de datos al backend
+  // 5. Envío al backend
   btn.addEventListener('click', async () => {
-    // Marcar campos vacíos visualmente
+    // marcar visualmente vacíos
     let valid = true;
-    container.querySelectorAll('select[name=fase], textarea[name=descripcion]').forEach(field => {
-      const isEmpty = field.value.trim() === '';
-      field.classList.toggle('invalid', isEmpty);
-      if (isEmpty) valid = false;
+    container.querySelectorAll('select[name=fase], textarea[name=descripcion]').forEach(f => {
+      const empty = f.value.trim() === '';
+      f.classList.toggle('invalid', empty);
+      if (empty) valid = false;
     });
     if (!valid) return;
 
@@ -103,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fase: card.querySelector('select[name=fase]').value,
       descripcion: card.querySelector('textarea[name=descripcion]').value,
     }));
-
+    
     // Llamada al backend (Apps Script)
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwWyA1dOpSXL1iml8tL5z1OIR91VfgnQO2ZxE54SmDYDXpmgOSZm9EmYwfblRTLR2Vc/exec';  // pon aquí tu URL real
 
