@@ -3,8 +3,8 @@
 /* Layout responsive con grid */
 #cards-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Tarjetas más anchas */
+  gap: 1.5rem; /* Espacio mayor entre tarjetas */
   margin-top: 1rem;
 }
 
@@ -13,7 +13,7 @@
   position: relative;
   border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 0.5rem;
+  padding: 1rem; /* Más espacio interno */
   background: #fafafa;
   transition: box-shadow 0.2s;
   display: flex;
@@ -29,21 +29,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem; /* Ajustado para más separación */
 }
 
 /* Icono de arrastre */
 .drag-handle {
+  cursor: grab;
+  font-size: 1.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 1.8rem;
   height: 1.8rem;
-  cursor: grab;
   user-select: none;
   pointer-events: auto;
   z-index: 1;
-  font-size: 1.2rem;
 }
 .drag-handle:active {
   cursor: grabbing;
@@ -67,26 +67,31 @@
   width: 100%;
   height: auto;
   border-radius: 4px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem; /* Más separación antes del select */
 }
 
-/* Inputs y textareas */
-.card input,
+/* Select y textarea */
+.card select,
 .card textarea {
   width: 100%;
   box-sizing: border-box;
   font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-  padding: 0.25rem;
+  padding: 0.5rem; /* Más padding para comodidad */
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-/* Limitar altura con scroll interno */
+/* Separación específica entre select y textarea */
+.card select {
+  margin-bottom: 1rem; /* Espacio mayor antes del textarea */
+}
+
+/* Limitar altura de textarea con scroll interno */
 .card textarea {
   resize: vertical;
-  max-height: 4rem;
+  max-height: 6rem; /* Textarea más alto */
   overflow-y: auto;
+  margin-bottom: 0; /* Último elemento dentro de tarjeta */
 }
 
 /* Campo inválido */
@@ -129,6 +134,7 @@
 /* Responsive adjustments */
 @media (max-width: 600px) {
   #cards-container {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Ajuste para móvil */
+    gap: 1rem;
   }
 }
