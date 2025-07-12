@@ -2,20 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Cendrillon – Narrativa Visual</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Lavater: Cendrillon</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <h1>Ordena y narra la historia de Cendrillon</h1>
-  <p>Arrastra las tarjetas para ordenarlas y escribe una frase para cada una.</p>
-
-  <div id="card-container" class="card-container">
-    <!-- Tarjetas con imagen + texto -->
+  <h1>Ordena las escenas de Cendrillon</h1>
+  <div id="cards-container">
+    <!-- Aquí se inyectarán las tarjetas -->
   </div>
-
-  <button id="submit-btn">Enviar narrativa</button>
-
-  <script src="script.js"></script>
+  <button id="generate-btn">Generar cuento</button>
+  <pre id="output-story"></pre>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
-
