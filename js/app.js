@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Construir HTML de opciones
     const optionsHTML = fasesOptions
-      .map(opt => `<option value="${opt}">${opt}</option>`)
+      .map(opt => `<option value="${opt}">${opt}</option>`)  
       .join('');
 
     div.innerHTML = `
@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </select>
       <textarea name="descripcion" placeholder="Descripción"></textarea>
     `;
+
     container.appendChild(div);
   });
 
@@ -72,12 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Actualizar badges inicialmente
   updateBadges();
 
-  // 5. Validación de inputs y deshabilitar botón hasta validación
+  // 5. Validación de inputs (select + textarea) y deshabilitar botón hasta validación
   const btn = document.getElementById('generate-btn');
+  btn.disabled = true; // Deshabilitar inicialmente
 
   function validateAll() {
-    return Array.from(container.querySelectorAll('select[name=fase]'))
+    const faseValid = Array.from(container.querySelectorAll('select[name=fase]'))
       .every(sel => sel.value.trim() !== '');
+    const descValid = Array.from(container.querySelectorAll('textarea[name=descripcion]'))
+      .every(txt => txt.value.trim() !== '');
+    return faseValid && descValid;
   }
 
   // Deshabilitar o habilitar botón según validación
@@ -92,9 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
     container.querySelectorAll('select[name=fase], textarea[name=descripcion]').forEach(field => {
       const isEmpty = field.value.trim() === '';
       field.classList.toggle('invalid', isEmpty);
-      if (field.name === 'fase' && isEmpty) valid = false;
+      if ((field.name === 'fase' || field.name === 'descripcion') && isEmpty) valid = false;
     });
-    if (!valid) return; // No enviar si falta fase narrativa
+    if (!valid) return; // No enviar si falta algún campo
 
     // Recolectar datos
     const payload = Array.from(container.children).map(card => ({
@@ -104,16 +109,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
 
     // Llamada al backend (Apps Script)
-    try {
-      const resp = await fetch('https://script.google.com/macros/s/TU_DEPLOY_ID/exec', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenes: payload })
-      });
-      const data = await resp.json();
-      document.getElementById('output-story').textContent = data.story;
-    } catch (err) {
-      console.error('Error al llamar al backend:', err);
-    }
-  });
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwWyA1dOpSXL1iml8tL5z1OIR91VfgnQO2ZxE54SmDYDXpmgOSZm9EmYwfblRTLR2Vc/exec';  // pon aquí tu URL real
+
+    // …en tu listener de click…
+    btn.addEventListener('click', async () => {
+      // validaciones…
+      try {
+        const resp = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            instructions: 'Genera un cuento popular de aproximadamente 200 palabras basado en las descripciones de las escenas siguientes. Usa un tono narrativo clásico, cercano a la tradición oral. Presenta personajes claros y un arco argumental coherente. Mantén un ritmo ágil y un vocabulario accesible para jóvenes. No excedas las 200 palabras en total.', // opcional
+            scenes: payload
+          })
+        });
+        const data = await resp.json();
+        document.getElementById('output-story').textContent = data.story;
+      } catch (err) {
+        console.error('Error al llamar al backend:', err);
+      }
+    });
 });
