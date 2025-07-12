@@ -1,0 +1,12 @@
+body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 1rem; }
+#cards-container { display: flex; flex-wrap: wrap; gap: 1rem; }
+.card {
+  border: 1px solid #ccc; border-radius: 8px; padding: 0.5rem;
+  width: 150px; background: #fafafa;
+}
+.card img { width: 100%; height: auto; }
+.card input, .card textarea {
+  width: 100%; margin-top: 0.5rem; box-sizing: border-box;
+}
+#generate-btn { margin-top: 1rem; padding: 0.5rem 1rem; }
+#output-story { white-space: pre-wrap; background: #f0f0f0; padding: 1rem; margin-top: 1rem; }
