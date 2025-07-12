@@ -1,4 +1,3 @@
-// Genera automáticamente el array de tarjetas del 1 al 20
 const cards = Array.from({ length: 20 }, (_, i) => ({
   id: i + 1,
   img: `images/${i + 1}.jpg`
@@ -19,7 +18,7 @@ function renderCards() {
       <textarea placeholder="Describe esta escena..."></textarea>
     `;
 
-    // Eventos para drag and drop
+    // Eventos de arrastre
     div.addEventListener("dragstart", handleDragStart);
     div.addEventListener("dragover", handleDragOver);
     div.addEventListener("drop", handleDrop);
@@ -66,3 +65,4 @@ document.getElementById("submit-btn").addEventListener("click", () => {
   alert("Narrativa registrada en consola. (Aquí se conectará con Apps Script)");
 });
 
+renderCards();
