@@ -18,20 +18,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('cards-container');
   container.innerHTML = '';
 
+  // Opciones para fase narrativa
+  const fasesOptions = [
+    'Situación inicial',
+    'Conflicto',
+    'Desarrollo',
+    'Resolución',
+    'Situación final'
+  ];
+
   // 3. Renderizar tarjetas usando el array mezclado
   ids.forEach(id => {
     const div = document.createElement('div');
     div.className = 'card';
     div.dataset.id = id;
+
+    // Construir HTML de opciones
+    const optionsHTML = fasesOptions
+      .map(opt => `<option value="${opt}">${opt}</option>`)
+      .join('');
+
     div.innerHTML = `
       <div class="card-header">
         <span class="drag-handle">☰</span>
         <span class="badge">?</span>
       </div>
       <img src="images/${id}.jpg" alt="Escena ${id}">
-      <input type="text" name="fase" placeholder="Fase narrativa">
+      <select name="fase">
+        <option value="" disabled selected>Fase narrativa</option>
+        ${optionsHTML}
+      </select>
       <textarea name="descripcion" placeholder="Descripción"></textarea>
-      <textarea name="dialogo" placeholder="Diálogo"></textarea>
     `;
     container.appendChild(div);
   });
@@ -45,11 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const sortable = new Sortable(container, {
     handle: '.drag-handle',
-    draggable: '.card',      // sólo .card es arrastrable
+    draggable: '.card',
     animation: 150,
     onUpdate: updateBadges,
     onStart: ({ item }) => item.classList.add('dragging'),
-    onEnd:   ({ item }) => item.classList.remove('dragging'),
+    onEnd: ({ item }) => item.classList.remove('dragging'),
   });
 
   // Actualizar badges inicialmente
@@ -59,8 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('generate-btn');
 
   function validateAll() {
-    return Array.from(container.querySelectorAll('input[name=fase]'))
-      .every(input => input.value.trim() !== '');
+    return Array.from(container.querySelectorAll('select[name=fase]'))
+      .every(sel => sel.value.trim() !== '');
   }
 
   // Deshabilitar o habilitar botón según validación
@@ -72,19 +89,18 @@ document.addEventListener('DOMContentLoaded', () => {
   btn.addEventListener('click', async () => {
     // Marcar campos vacíos
     let valid = true;
-    container.querySelectorAll('input[name=fase], textarea').forEach(field => {
+    container.querySelectorAll('select[name=fase], textarea[name=descripcion]').forEach(field => {
       const isEmpty = field.value.trim() === '';
       field.classList.toggle('invalid', isEmpty);
       if (field.name === 'fase' && isEmpty) valid = false;
     });
-    if (!valid) return; // No enviar si falta fase narrativa en alguna tarjeta
+    if (!valid) return; // No enviar si falta fase narrativa
 
     // Recolectar datos
     const payload = Array.from(container.children).map(card => ({
       id: card.dataset.id,
-      fase: card.querySelector('[name=fase]').value,
-      descripcion: card.querySelector('[name=descripcion]').value,
-      dialogo: card.querySelector('[name=dialogo]').value,
+      fase: card.querySelector('select[name=fase]').value,
+      descripcion: card.querySelector('textarea[name=descripcion]').value,
     }));
 
     // Llamada al backend (Apps Script)
