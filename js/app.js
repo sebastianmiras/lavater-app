@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const sortable = new Sortable(container, {
     handle: '.drag-handle',
+    draggable: '.card',      // sólo .card es arrastrable
     animation: 150,
     onUpdate: updateBadges,
     onStart: ({ item }) => item.classList.add('dragging'),
