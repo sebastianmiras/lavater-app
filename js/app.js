@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Generar y barajar IDs del 1 al 20
   const ids = shuffle(Array.from({ length: 20 }, (_, i) => i + 1));
-  console.log('IDs aleatorios:', ids);
 
   // 2. Seleccionar y limpiar el contenedor
   const container = document.getElementById('cards-container');
@@ -33,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     div.className = 'card';
     div.dataset.id = id;
 
-    // Construir HTML de opciones
     const optionsHTML = fasesOptions
       .map(opt => `<option value="${opt}">${opt}</option>`)  
       .join('');
@@ -50,18 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
       </select>
       <textarea name="descripcion" placeholder="Descripción"></textarea>
     `;
-
     container.appendChild(div);
   });
 
-  // 4. Inicializar Sortable.js con drag handle y feedback visual
+  // 4. Inicializar Sortable.js y actualizar badges
   function updateBadges() {
     Array.from(container.children).forEach((card, index) => {
       card.querySelector('.badge').textContent = index + 1;
     });
   }
 
-  const sortable = new Sortable(container, {
+  new Sortable(container, {
     handle: '.drag-handle',
     draggable: '.card',
     animation: 150,
@@ -69,14 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
     onStart: ({ item }) => item.classList.add('dragging'),
     onEnd: ({ item }) => item.classList.remove('dragging'),
   });
-
-  // Actualizar badges inicialmente
   updateBadges();
 
-  // 5. Validación de inputs (select + textarea) y deshabilitar botón hasta validación
+  // 5. Validación de inputs y gestión de estado del botón
   const btn = document.getElementById('generate-btn');
-  btn.disabled = true; // Deshabilitar inicialmente
-
+  
   function validateAll() {
     const faseValid = Array.from(container.querySelectorAll('select[name=fase]'))
       .every(sel => sel.value.trim() !== '');
@@ -85,23 +79,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return faseValid && descValid;
   }
 
-  // Deshabilitar o habilitar botón según validación
+  // Estado inicial del botón
+  btn.disabled = !validateAll();
+
+  // Escucha para habilitar/deshabilitar al cambiar inputs
   container.addEventListener('input', () => {
     btn.disabled = !validateAll();
   });
 
-  // 6. Envío de datos y manejo de validación en clic
+  // 6. Envío de datos al backend
   btn.addEventListener('click', async () => {
-    // Marcar campos vacíos
+    // Marcar campos vacíos visualmente
     let valid = true;
     container.querySelectorAll('select[name=fase], textarea[name=descripcion]').forEach(field => {
       const isEmpty = field.value.trim() === '';
       field.classList.toggle('invalid', isEmpty);
-      if ((field.name === 'fase' || field.name === 'descripcion') && isEmpty) valid = false;
+      if (isEmpty) valid = false;
     });
-    if (!valid) return; // No enviar si falta algún campo
+    if (!valid) return;
 
-    // Recolectar datos
     const payload = Array.from(container.children).map(card => ({
       id: card.dataset.id,
       fase: card.querySelector('select[name=fase]').value,
