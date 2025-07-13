@@ -4,7 +4,7 @@
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwWyA1dOpSXL1iml8tL5z1OIR91VfgnQO2ZxE54SmDYDXpmgOSZm9EmYwfblRTLR2Vc/exec';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 0. Fisher–Yates shuffle
+  // Fisher–Yates shuffle
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -13,10 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return array;
   }
 
-  // 1. Barajar IDs del 1 al 20 y renderizar
+  // Barajar IDs y renderizar tarjetas
   const ids = shuffle(Array.from({ length: 20 }, (_, i) => i + 1));
   const container = document.getElementById('cards-container');
-  container.innerHTML = ''; 
+  container.innerHTML = '';
+
   const fasesOptions = [
     'Situación inicial',
     'Conflicto',
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const optionsHTML = fasesOptions
     .map(opt => `<option value="${opt}">${opt}</option>`)
     .join('');
+
   ids.forEach(id => {
     const div = document.createElement('div');
     div.className = 'card';
@@ -46,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     container.appendChild(div);
   });
 
-  // 2. Sortable.js + badges
+  // Sortable.js + badges
   function updateBadges() {
     Array.from(container.children).forEach((card, i) => {
       card.querySelector('.badge').textContent = i + 1;
@@ -62,35 +64,38 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   updateBadges();
 
-  // 3. Validación de todos los campos + nombre de usuario
-  const btn = document.getElementById('generate-btn');
-  const groupInput = document.getElementById('group-name');
+  // Inputs y validación
+  const btn         = document.getElementById('generate-btn');
+  const groupInput  = document.getElementById('group-name');
+  const emailInput  = document.getElementById('user-email');
   btn.disabled = true;
 
   function validateAll() {
     const groupOK = groupInput.value.trim() !== '';
+    const emailOK = /\S+@\S+\.\S+/.test(emailInput.value);
     const fasesOK = Array.from(container.querySelectorAll('select[name=fase]'))
       .every(sel => sel.value.trim() !== '');
     const descOK  = Array.from(container.querySelectorAll('textarea[name=descripcion]'))
       .every(txt => txt.value.trim() !== '');
-    return groupOK && fasesOK && descOK;
+    return groupOK && emailOK && fasesOK && descOK;
   }
 
-  // Listeners para habilitar/deshabilitar el botón
-  groupInput.addEventListener('input', () => btn.disabled = !validateAll());
-  container.addEventListener('input',   () => btn.disabled = !validateAll());
+  // Escucha cambios
+  [groupInput, emailInput].forEach(inp =>
+    inp.addEventListener('input', () => btn.disabled = !validateAll())
+  );
+  container.addEventListener('input', () => btn.disabled = !validateAll());
 
-  // 4. Envío al backend
+  // Envío al backend
   btn.addEventListener('click', async () => {
-    // marcar visualmente vacíos
     let valid = true;
-    // chequeo tanto de fases, descripciones y nombre
     if (groupInput.value.trim() === '') {
-      groupInput.classList.add('invalid');
-      valid = false;
-    } else {
-      groupInput.classList.remove('invalid');
-    }
+      groupInput.classList.add('invalid'); valid = false;
+    } else groupInput.classList.remove('invalid');
+    if (!/\S+@\S+\.\S+/.test(emailInput.value)) {
+      emailInput.classList.add('invalid'); valid = false;
+    } else emailInput.classList.remove('invalid');
+
     container.querySelectorAll('select[name=fase], textarea[name=descripcion]')
       .forEach(f => {
         const empty = f.value.trim() === '';
@@ -99,21 +104,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     if (!valid) return;
 
-    // recolectar payload
-    const userName = groupInput.value.trim();
-    const scenes   = Array.from(container.children).map(card => ({
+    const scenes = Array.from(container.children).map(card => ({
       id:          card.dataset.id,
       fase:        card.querySelector('select[name=fase]').value,
       descripcion: card.querySelector('textarea[name=descripcion]').value
     }));
+    const payload = {
+      userName: groupInput.value.trim(),
+      userEmail: emailInput.value.trim(),
+      instructions: `Genera un cuento popular de aproximadamente 200 palabras basado en las descripciones de las escenas siguientes. Usa un tono narrativo clásico, cercano a la tradición oral. Presenta personajes claros y un arco argumental coherente. Mantén un ritmo ágil. No excedas las 200 palabras en total.`,
+      scenes
+    };
+
     try {
       const resp = await fetch(WEB_APP_URL, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ 
-          userName, 
-          scenes 
-        })
+        body:    JSON.stringify(payload)
       });
       const data = await resp.json();
       document.getElementById('output-story').textContent = data.story;
