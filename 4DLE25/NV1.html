@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4DLE25 — NV1</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #111821;
+      --text: #e6edf3;
+      --muted: #9aa4af;
+      --accent: #2e7d32;
+      --danger: #c62828;
+      --max-width: 1200px;
+      --caption-size: clamp(18px, 2.2vh + 0.6rem, 28px);
+    }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans"; display: grid; grid-template-rows: auto 1fr auto; }
+    header, footer { background: var(--panel); }
+    header { position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .bar { max-width: var(--max-width); margin: 0 auto; padding: .6rem 1rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .title { font-weight: 600; letter-spacing: .2px; }
+    .spacer { flex: 1; }
+    .btn { appearance: none; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: var(--text); padding: .45rem .7rem; border-radius: .6rem; cursor: pointer; font-size: .95rem; }
+    .btn:hover { background: rgba(255,255,255,.12); }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { opacity: .5; cursor: not-allowed; }
+    .stage { display: grid; place-items: center; }
+    .frame { width: 100%; max-width: var(--max-width); padding: .5rem 1rem 0; }
+    figure { margin: 0; }
+    .image-wrap { position: relative; background: #000; display: grid; place-items: center; border-radius: .8rem; overflow: hidden; }
+    img#slide { display: block; width: 100%; height: auto; max-height: calc(100vh - 220px); object-fit: contain; image-rendering: auto; }
+    .overlay-controls { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
+    .nav-btn { pointer-events: auto; background: rgba(0,0,0,.45); border: none; color: #fff; padding: .7rem .9rem; margin: .4rem; border-radius: .7rem; font-size: 1.1rem; cursor: pointer; }
+    .nav-btn:hover { background: rgba(0,0,0,.6); }
+    figcaption { margin: .8rem 0 0; line-height: 1.5; }
+    .caption { font-size: var(--caption-size); }
+    .meta { display: flex; align-items: baseline; gap: .8rem; color: var(--muted); margin-top: .25rem; font-size: .95rem; flex-wrap: wrap; }
+    .chip { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: .5rem; padding: .15rem .45rem; font-size: .9rem; }
+    footer { position: sticky; bottom: 0; box-shadow: 0 -2px 8px rgba(0,0,0,.35); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background: rgba(255,255,255,.08); padding: .15rem .35rem; border-radius: .35rem; }
+    .hi-contrast img#slide { filter: contrast(1.1) saturate(1.05); }
+    @media (max-height: 700px) { img#slide { max-height: calc(100vh - 190px); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">4DLE25 — Grupo <span id="groupName">NV1</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia C&J" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText">Descripción de la secuencia…</div>
+          <div class="meta">
+            <span class="chip" id="phase">—</span>
+            <span>Archivo: <span id="fileName">—</span></span>
+            <span>•</span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <footer>
+    <div class="bar" style="gap:.5rem;">
+      <div>Atajos: <span class="kbd">F</span> pantalla completa · <span class="kbd">←</span>/<span class="kbd">→</span> navegar · <span class="kbd">+</span>/<span class="kbd">-</span> tamaño texto</div>
+      <div class="spacer"></div>
+      <div id="preloadInfo" style="color:var(--muted);"></div>
+    </div>
+  </footer>
+
+  <script>
+    // ==========================
+    // CONFIGURACIÓN — NV1
+    // ==========================
+    const GROUP_NAME = "NV1";
+
+    // Las páginas HTML estarán dentro de /4DLE25 y las imágenes en /images.
+    // Por eso la ruta relativa desde aquí es ../images/<archivo>.
+    const PATH_PREFIX = "../images/";
+
+    // Orden y datos del grupo NV1 (IDs → nombre de archivo "<id>.jpg").
+    const DATA = [
+      { id: 12, fase: "Situación inicial", descripcion: "Se aprecia el nacimiento de las hermanastras de Cenicienta. son los dos círculos pequeños y el círculo grande es la madrastra." },
+      { id: 3,  fase: "Situación inicial", descripcion: "Llega Cenicienta a la casa de las hermanastras y la madrastra. el círculo azul es cenicienta." },
+      { id: 2,  fase: "Situación inicial", descripcion: "Aparecen los soldados en la casa para invitar a las hermanastras y la madrastra al baile donde conocerán al príncipe. No aparece Cenicienta en esta viñeta. los  triángulos con barritas son los soldados." },
+      { id: 1,  fase: "Situación inicial", descripcion: "Cenicienta se queda en la habitación encerrada limpiando y triste porque no puede ir al baile." },
+      { id: 4,  fase: "Desarrollo", descripcion: "La madrastra y hermanastras se van al baile que aparecen los soldados esperandolas" },
+      { id: 5,  fase: "Desarrollo", descripcion: "Aparece el hada madrina que es el círculo naranja con el punto azul y empieza a hacer el hechizo con la carroza (espiral naranja) con los zapatos de cristal (2 circulitos pequeños)" },
+      { id: 20, fase: "Desarrollo", descripcion: "La cenicienta y el príncipe la reciben a ella en el baile, el hechizo empieza a hacer efecto. (triangulo amarillo-fucsia)" },
+      { id: 6,  fase: "Desarrollo", descripcion: "La cenicienta está entrando al baile." },
+      { id: 7,  fase: "Desarrollo", descripcion: "Entra en el baile y se encuentra al príncipe con las dos hermanastras" },
+      { id: 9,  fase: "Desarrollo", descripcion: "Las hermanas se van y cenicienta está bailando con el principe (triángulo amarillo-fucsia)" },
+      { id: 8,  fase: "Desarrollo", descripcion: "Bailan y se van conociendo" },
+      { id: 19, fase: "Desarrollo", descripcion: "Salen al jardín y hablan mientras los espían la madrastra y las hermanastras. empieza a deshacer el hechizo" },
+      { id: 18, fase: "Desarrollo", descripcion: "Se despide cenicienta del príncipe porque son las 00:00 y se despide del príncipe mientras que las hermanastras llegan al jardín." },
+      { id: 10, fase: "Conflicto", descripcion: "El hada madrina está oscura porque se ha terminado el hechizo y al irse corriendo pierde un zapato." },
+      { id: 13, fase: "Conflicto", descripcion: "Las hermanas salen para irse a casa y el príncipe se encuentra un zapato de cristal" },
+      { id: 14, fase: "Resolución", descripcion: "El príncipe llega a la casa para probar el zapato a una de las hermanastras mientras cenicienta está encerrada en su habitación" },
+      { id: 15, fase: "Resolución", descripcion: "Se lo prueba a la otra hermanastra y cenicienta sigue encerrada" },
+      { id: 11, fase: "Resolución", descripcion: "Cenicienta está triste llorando porque es su zapato y no puede salir, al final consigue salir." },
+      { id: 16, fase: "Resolución", descripcion: "Se prueba el zapato que ha traído el príncipe mientras las demás observan que encaja a la perfección." },
+      { id: 17, fase: "Situación final", descripcion: "Finalmente cenicienta tiene los dos zapatos y está con el príncipe mientras que las otras están enfadadas." }
+    ];
+
+    // ==========================
+    // LÓGICA DE LA GALERÍA
+    // ==========================
+    document.title = `4DLE25 — ${GROUP_NAME}`;
+    document.getElementById('groupName').textContent = GROUP_NAME;
+
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const fileNameEl = document.getElementById('fileName');
+    const counterEl = document.getElementById('counter');
+    const preloadInfoEl = document.getElementById('preloadInfo');
+    const phaseEl = document.getElementById('phase');
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+
+    let i = 0; // índice actual
+    let captionScale = 1;
+
+    function show(index) {
+      if (index < 0 || index >= DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      const file = `${id}.jpg`;
+      imgEl.src = srcFor(file);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || '';
+      phaseEl.textContent = fase || '—';
+      fileNameEl.textContent = file;
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+      // Preload siguiente
+      const next = DATA[i+1];
+      if (next) {
+        const p = new Image();
+        p.src = srcFor(`${next.id}.jpg`);
+        preloadInfoEl.textContent = `Precargando: ${next.id}.jpg`;
+      } else {
+        preloadInfoEl.textContent = '';
+      }
+      // Botones
+      document.getElementById('prevBtn').disabled = (i === 0);
+      document.getElementById('overlayPrev').disabled = (i === 0);
+      const atEnd = (i === DATA.length - 1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+
+    function next() { if (i < DATA.length - 1) show(i+1); }
+    function prev() { if (i > 0) show(i-1); }
+
+    // Eventos UI
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    // Teclado
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase() === 'f') { toggleFullscreen(); }
+      if (e.key === '+') { zoomCaption(0.1); }
+      if (e.key === '-') { zoomCaption(-0.1); }
+    });
+
+    // Pantalla completa
+    const fsBtn = document.getElementById('fsBtn');
+    fsBtn.addEventListener('click', toggleFullscreen);
+    function toggleFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) { elem.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+
+    // Ajuste tamaño de texto
+    function setCaptionScale(scale) {
+      captionScale = Math.max(0.6, Math.min(scale, 2.2));
+      captionEl.style.fontSize = `calc(var(--caption-size) * ${captionScale})`;
+    }
+    function zoomCaption(delta) { setCaptionScale(captionScale + delta); }
+    document.getElementById('zoomIn').addEventListener('click', () => zoomCaption(0.1));
+    document.getElementById('zoomOut').addEventListener('click', () => zoomCaption(-0.1));
+
+    // Alto contraste
+    document.getElementById('contrastBtn').addEventListener('click', () => document.body.classList.toggle('hi-contrast'));
+
+    // Inicio
+    show(0);
+  </script>
+</body>
+</html>
