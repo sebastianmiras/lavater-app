@@ -21,7 +21,6 @@
     .muted{color:var(--muted);font-size:.95rem}
     footer{position:sticky;bottom:0;background:var(--panel);box-shadow:0 -2px 8px rgba(0,0,0,.35)}
     .foot{max-width:var(--max);margin:0 auto;padding:.6rem 1rem;display:flex;gap:.75rem;align-items:center;justify-content:space-between;color:var(--muted)}
-    .warn{color:#ffc371}
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:rgba(255,255,255,.08);padding:.1rem .35rem;border-radius:.35rem}
     .row{display:flex;gap:.5rem;flex-wrap:wrap}
     input[type="text"]{flex:1;min-width:240px;background:#0e1520;border:1px solid rgba(255,255,255,.12);border-radius:.6rem;color:var(--text);padding:.55rem .7rem}
@@ -34,31 +33,29 @@
     </div>
   </header>
   <main>
-    <p class="intro">Selecciona un grupo para abrir su secuencia (imágenes en <code>/images/1.jpg…20.jpg</code>). Cada página es navegable con clic o teclas <span class="kbd">←</span>/<span class="kbd">→</span> y <span class="kbd">F</span> para pantalla completa.</p>
+    <p class="intro">Selecciona un grupo para abrir su secuencia. Cada página es navegable con clic o teclas <span class="kbd">←</span>/<span class="kbd">→</span> y <span class="kbd">F</span> para pantalla completa.</p>
 
     <div class="row" style="margin-bottom:10px">
       <input id="q" type="text" placeholder="Filtrar grupos (p. ej. NV)…" aria-label="Filtrar" />
     </div>
 
     <div class="grid" id="grid">
-      <!-- Ajusta/añade aquí tus grupos; los href apuntan a archivos en esta misma carpeta 4DLE25/ -->
+      <a class="card" data-name="LX1" href="./LX1.html">LX1</a>
+      <a class="card" data-name="LX2" href="./LX2.html">LX2</a>
+      <a class="card" data-name="LX3" href="./LX3.html">LX3</a>
+      <a class="card" data-name="FL1" href="./FL1.html">FL1</a>
+      <a class="card" data-name="FL2" href="./FL2.html">FL2</a>
+      <a class="card" data-name="FL3" href="./FL3.html">FL3</a>
+      <a class="card" data-name="RD1" href="./RD1.html">RD1</a>
+      <a class="card" data-name="RD2" href="./RD2.html">RD2</a>
+      <a class="card" data-name="RD3" href="./RD3.html">RD3</a>
       <a class="card" data-name="NV1" href="./NV1.html">NV1</a>
       <a class="card" data-name="NV2" href="./NV2.html">NV2</a>
       <a class="card" data-name="NV3" href="./NV3.html">NV3</a>
-      <a class="card" data-name="NV4" href="./NV4.html">NV4</a>
-      <a class="card" data-name="NV5" href="./NV5.html">NV5</a>
-      <a class="card" data-name="NV6" href="./NV6.html">NV6</a>
-      <a class="card" data-name="NV7" href="./NV7.html">NV7</a>
-      <a class="card" data-name="NV8" href="./NV8.html">NV8</a>
-      <a class="card" data-name="NV9" href="./NV9.html">NV9</a>
-      <a class="card" data-name="NV10" href="./NV10.html">NV10</a>
-      <a class="card" data-name="NV11" href="./NV11.html">NV11</a>
-      <a class="card" data-name="NV12" href="./NV12.html">NV12</a>
     </div>
   </main>
   <footer>
     <div class="foot">
-      <div>Consejo: si usas GitHub Pages desde la rama <code>main</code>, deja esta carpeta en <code>/4DLE25/</code> y las imágenes en <code>/images/</code>. Los enlaces son relativos.</div>
       <div class="muted">Pulsa <span class="kbd">F</span> dentro de cada grupo para pantalla completa</div>
     </div>
   </footer>
