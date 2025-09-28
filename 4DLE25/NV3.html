@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4DLE25 — NV3</title>
+  <style>
+    :root { --bg:#0b0f14; --panel:#111821; --text:#e6edf3; --muted:#9aa4af; --accent:#2e7d32; --max-width:1200px; --caption-size:clamp(18px,2.2vh + 0.6rem,28px); }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans"; display: grid; grid-template-rows: auto 1fr; }
+    header { position: sticky; top: 0; z-index: 10; background: var(--panel); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .bar { max-width: var(--max-width); margin: 0 auto; padding: .6rem 1rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .title { font-weight: 600; letter-spacing: .2px; }
+    .spacer { flex: 1; }
+    .btn { appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:.45rem .7rem; border-radius:.6rem; cursor:pointer; font-size:.95rem; text-decoration:none; }
+    .btn:hover { background: rgba(255,255,255,.12); }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .stage { display:grid; place-items:center; }
+    .frame { width:100%; max-width:var(--max-width); padding:.5rem 1rem 0; }
+    figure { margin:0; }
+    .image-wrap { position:relative; background:#000; display:grid; place-items:center; border-radius:.8rem; overflow:hidden; }
+    img#slide { display:block; width:100%; height:auto; max-height:calc(100vh - 220px); object-fit:contain; image-rendering:auto; }
+    .overlay-controls { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
+    .nav-btn { pointer-events:auto; background:rgba(0,0,0,.45); border:none; color:#fff; padding:.7rem .9rem; margin:.4rem; border-radius:.7rem; font-size:1.1rem; cursor:pointer; }
+    .nav-btn:hover { background:rgba(0,0,0,.6); }
+    figcaption { margin:.8rem 0 0; line-height:1.5; }
+    .caption { font-size: var(--caption-size); }
+    .meta { display:flex; align-items:baseline; gap:.8rem; color:var(--muted); margin-top:.25rem; font-size:.95rem; flex-wrap:wrap; }
+    .chip { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:.5rem; padding:.15rem .45rem; font-size:.9rem; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background: rgba(255,255,255,.08); padding: .15rem .35rem; border-radius: .35rem; }
+    .hi-contrast img#slide { filter: contrast(1.1) saturate(1.05); }
+    @media (max-height: 700px) { img#slide { max-height: calc(100vh - 190px); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">4DLE25 — Grupo <span id="groupName">NV3</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <a class="btn" id="backBtn" href="./index.html" title="Volver al índice">← Volver al índice</a>
+      <a class="btn" id="storyBtn" href="#" target="_blank" rel="noopener">📖 Ver relato</a>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia C&J" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText">Descripción de la secuencia…</div>
+          <div class="meta">
+            <span class="chip" id="phase">—</span>
+            <span>Posición original: <span id="originalPos">—</span></span>
+            <span>•</span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script>
+    // ==========================
+    // CONFIGURACIÓN — NV3
+    // ==========================
+    const GROUP_NAME = "NV3";
+
+    // Imágenes en /images/<id>.jpg (página situada en /4DLE25/)
+    const PATH_PREFIX = "../images/";
+
+    // Enlace opcional al relato de este grupo
+    const STORY_URL = ""; // p. ej. "./relatos/NV3.html" o URL absoluta
+
+    // Datos del grupo NV3 (orden, fases y descripciones)
+    const DATA = [
+      { id: 3,  fase: "Situación inicial", descripcion: "Cenicienta muestra a las hermanastras que está lista para ir a la fiesta con el vestido de su madre. La madrastra y las hermanastras no quieren que vaya a la fiesta. Cenicienta está muy triste." },
+      { id: 12, fase: "Conflicto", descripcion: "Las hermanastras y la madrastra le rompen el vestido a Cenicienta." },
+      { id: 1,  fase: "Desarrollo", descripcion: "Encierran a Cenicienta en la habitación de arriba." },
+      { id: 5,  fase: "Desarrollo", descripcion: "Aparece un hada madrina que le convierte una calabaza en una carroza, le pone otro vestido azul brillante y unos zapatos de cristal. La nube de tristeza de Cenicienta se va." },
+      { id: 2,  fase: "Desarrollo", descripcion: "La madrastra y las hermanastras se presentan en la fiesta ante la realeza." },
+      { id: 6,  fase: "Desarrollo", descripcion: "La Cenicienta aparece con la carroza en el palacio real de la fiesta, donde la recibe la corte real. La carroza es arrastrada por ratones y caballos." },
+      { id: 8,  fase: "Desarrollo", descripcion: "El príncipe desde las alturas ve a Cenicienta llegar con la carroza." },
+      { id: 9,  fase: "Desarrollo", descripcion: "La cenicienta entra al palacio y se encuentra con el príncipe quien le ofrece bailar mientras los reyes y los asistentes les observan." },
+      { id: 20, fase: "Desarrollo", descripcion: "Cenicienta se da cuenta de la hora y se va corriendo sin poder despedirse del príncipe. La madrastra la observa con rabia y enfado." },
+      { id: 10, fase: "Desarrollo", descripcion: "A las doce empieza a deshacerse el hechizo que la hada madrina le dijo. La Cenicienta tras irse corriendo pierde un zapato en las escaleras de la fiesta." },
+      { id: 11, fase: "Desarrollo", descripcion: "Cenicienta se vuelve a encerrar en la habitación con el vestido que le habían roto y se da cuenta que había perdido un zapato." },
+      { id: 4,  fase: "Desarrollo", descripcion: "La realeza va casa por casa buscando a quien le corresponde el zapato hasta llegar a la de Cenicienta. La madrastra tiene encerrada a Cenicienta que está enfadada." },
+      { id: 13, fase: "Desarrollo", descripcion: "La madrastra presenta a sus hijas como candidatas para probarse el zapato." },
+      { id: 15, fase: "Desarrollo", descripcion: "El príncipe le prueba el zapato a una de las hijas y no encaja." },
+      { id: 14, fase: "Desarrollo", descripcion: "El príncipe le prueba el zapato a la otra hija y tampoco encaja. Cenicienta observa enfadada desde su habitación." },
+      { id: 16, fase: "Resolución", descripcion: "Con la ayuda de los ratones, Cenicienta sale de la habitación y se presenta para que el príncipe le pruebe el zapato. La madrastra observa enfadada como el zapato le encaja a la perfección a Cenicienta." },
+      { id: 18, fase: "Resolución", descripcion: "La Cenicienta se va junto al príncipe mientras las hermanastras y la madrastra observan muy enfadadas desde su casa." },
+      { id: 19, fase: "Situación final", descripcion: "La Cenicienta y el príncipe llegan juntos a la boda mientras los invitados y la realeza esperan." },
+      { id: 7,  fase: "Situación final", descripcion: " La Cenicienta entra al palacio para casarse mientras todos la observan." },
+      { id: 17, fase: "Situación final", descripcion: "La Cenicienta y el Príncipe ya se han casado y las hermanastras y la madrastra están muy enfadadas con el casamiento. " }
+    ];
+
+    // ==========================
+    // LÓGICA DE LA GALERÍA
+    // ==========================
+    document.title = `4DLE25 — ${GROUP_NAME}`;
+    document.getElementById('groupName').textContent = GROUP_NAME;
+
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const counterEl = document.getElementById('counter');
+    const phaseEl = document.getElementById('phase');
+    const originalPosEl = document.getElementById('originalPos');
+
+    // Botón de relato (se oculta si no hay URL)
+    const storyBtn = document.getElementById('storyBtn');
+    if (!STORY_URL) { storyBtn.style.display = 'none'; } else { storyBtn.href = STORY_URL; }
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+
+    let i = 0; // índice actual
+    let captionScale = 1;
+
+    function show(index) {
+      if (index < 0 || index >= DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      const file = `${id}.jpg`;
+      imgEl.src = srcFor(file);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || '';
+      phaseEl.textContent = fase || '—';
+      originalPosEl.textContent = id;
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+
+      // Habilitar/Deshabilitar navegación
+      document.getElementById('prevBtn').disabled = (i === 0);
+      document.getElementById('overlayPrev').disabled = (i === 0);
+      const atEnd = (i === DATA.length - 1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+
+    function next() { if (i < DATA.length - 1) show(i+1); }
+    function prev() { if (i > 0) show(i-1); }
+
+    // Eventos UI
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    // Teclado
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase() === 'f') { toggleFullscreen(); }
+      if (e.key === '+') { zoomCaption(0.1); }
+      if (e.key === '-') { zoomCaption(-0.1); }
+    });
+
+    // Pantalla completa
+    const fsBtn = document.getElementById('fsBtn');
+    fsBtn.addEventListener('click', toggleFullscreen);
+    function toggleFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) { elem.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+
+    // Ajuste tamaño de texto
+    function setCaptionScale(scale) {
+      captionScale = Math.max(0.6, Math.min(scale, 2.2));
+      captionEl.style.fontSize = `calc(var(--caption-size) * ${captionScale})`;
+    }
+    function zoomCaption(delta) { setCaptionScale(captionScale + delta); }
+    document.getElementById('zoomIn').addEventListener('click', () => zoomCaption(0.1));
+    document.getElementById('zoomOut').addEventListener('click', () => zoomCaption(-0.1));
+
+    // Alto contraste
+    document.getElementById('contrastBtn').addEventListener('click', () => document.body.classList.toggle('hi-contrast'));
+
+    // Inicio
+    show(0);
+  </script>
+</body>
+</html>
