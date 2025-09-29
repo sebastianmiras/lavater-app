@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>4DLE25 — Métricas de ordenación</title>
+<style>
+  :root{--bg:#0b0f14;--panel:#111821;--text:#e6edf3;--muted:#9aa4af;--accent:#2e7d32;--max:1100px}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto}
+  header{position:sticky;top:0;background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.35);z-index:10}
+  .bar{max-width:var(--max);margin:0 auto;padding:.8rem 1rem;display:flex;gap:.6rem;align-items:center}
+  h1{font-size:clamp(18px,3vw,26px);margin:0;font-weight:650}
+  main{max-width:var(--max);margin:0 auto;padding:1rem}
+  .btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--text);padding:.45rem .7rem;border-radius:.6rem;cursor:pointer;text-decoration:none}
+  .btn:hover{background:rgba(255,255,255,.12)}
+  table{width:100%;border-collapse:collapse;margin-top:1rem}
+  th,td{padding:.6rem .7rem;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
+  th{color:#c9d1d9;cursor:pointer;white-space:nowrap}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .muted{color:var(--muted)}
+  .badge{display:inline-block;padding:.1rem .4rem;border-radius:.4rem;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>Métricas de ordenación — 4DLE25</h1>
+    <div style="flex:1"></div>
+    <a class="btn" href="./index.html">← Volver al índice</a>
+    <button class="btn" id="downloadCsv">⬇️ CSV</button>
+  </div>
+</header>
+<main>
+  <div class="muted">Base: secuencia original 1→20. Métricas: <span class="badge">Posición exacta %</span> · <span class="badge">Pares en orden %</span> · <span class="badge">LIS %</span> · <span class="badge">±1 %</span></div>
+  <table id="scores">
+    <thead>
+      <tr>
+        <th data-k="group">Grupo</th>
+        <th data-k="accuracy">Posición exacta %</th>
+        <th data-k="pairsInOrderPct">Pares en orden %</th>
+        <th data-k="lisPct">LIS %</th>
+        <th data-k="tol1Pct">±1 %</th>
+        <th data-k="inversions">Inversiones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</main>
+
+<script src="./groups-orders.js"></script>
+<script>
+// ===== Métricas =====
+const original = Array.from({length:20}, (_,i)=>i+1);
+const pos = Object.fromEntries(original.map((id,i)=>[id,i]));
+
+function metrics(order){
+  const n=original.length, P=n*(n-1)/2;
+  // exactas
+  const correct = order.filter((id,i)=>id===original[i]).length;
+  const accuracy = 100*correct/n;
+  // pares en orden (inversiones)
+  let inv=0;
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      if(pos[order[i]]>pos[order[j]]) inv++;
+    }
+  }
+  const pairsInOrderPct = 100*(1 - inv/P);
+  // LIS
+  const seq = order.map(id=>pos[id]);
+  const lis = (function lis(a){
+    const tails=[];
+    for(const x of a){
+      let lo=0,hi=tails.length;
+      while(lo<hi){const m=(lo+hi)>>1; if(tails[m]<x) lo=m+1; else hi=m;}
+      tails[lo]=x;
+    }
+    return tails.length;
+  })(seq);
+  const lisPct = 100*lis/n;
+  // tolerancia ±1
+  const tol1 = order.filter((id,i)=>Math.abs(pos[id]-i)<=1).length;
+  const tol1Pct = 100*tol1/n;
+
+  return {
+    accuracy:+accuracy.toFixed(1),
+    pairsInOrderPct:+pairsInOrderPct.toFixed(1),
+    lisPct:+lisPct.toFixed(1),
+    tol1Pct:+tol1Pct.toFixed(1),
+    inversions:inv
+  };
+}
+
+// ===== Render tabla =====
+const tbody = document.querySelector('#scores tbody');
+const rows = Object.entries(GROUP_ORDERS).map(([group,order])=>{
+  const m = metrics(order);
+  return { group, ...m };
+});
+
+function render(data){
+  tbody.innerHTML = data.map(r=>`
+    <tr>
+      <td>${r.group}</td>
+      <td class="num">${r.accuracy}</td>
+      <td class="num">${r.pairsInOrderPct}</td>
+      <td class="num">${r.lisPct}</td>
+      <td class="num">${r.tol1Pct}</td>
+      <td class="num">${r.inversions}</td>
+    </tr>
+  `).join('');
+}
+render(rows);
+
+// ===== Ordenar por columna =====
+let sortKey='group', sortDir=1;
+document.querySelectorAll('th[data-k]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const k = th.dataset.k;
+    sortDir = (k===sortKey)? -sortDir : 1;
+    sortKey = k;
+    const sorted = [...rows].sort((a,b)=>{
+      if (typeof a[k]==='number') return (a[k]-b[k])*sortDir;
+      return String(a[k]).localeCompare(String(b[k]))*sortDir;
+    });
+    render(sorted);
+  });
+});
+
+// ===== Descargar CSV =====
+document.getElementById('downloadCsv').addEventListener('click', ()=>{
+  const header = ['Grupo','Posición exacta %','Pares en orden %','LIS %','±1 %','Inversiones'];
+  const lines = [header.join(',')].concat(
+    rows.map(r=>[r.group,r.accuracy,r.pairsInOrderPct,r.lisPct,r.tol1Pct,r.inversions].join(','))
+  );
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '4DLE25-metricas.csv';
+  a.click();
+});
+</script>
+</body>
+</html>
