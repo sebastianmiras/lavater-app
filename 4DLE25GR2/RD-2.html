@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GR2 — RD-2</title>
+  <style>
+    :root{--bg:#0b0f14;--panel:#111821;--text:#e6edf3;--muted:#9aa4af;--max:1200px;--caption:clamp(18px,2.2vh + .6rem,28px)}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    header{position:sticky;top:0;z-index:10;background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .bar{max-width:var(--max);margin:0 auto;padding:.6rem 1rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+    .title{font-weight:600} .spacer{flex:1}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--text);padding:.45rem .7rem;border-radius:.6rem;cursor:pointer;text-decoration:none}
+    .btn:hover{background:rgba(255,255,255,.12)} .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .stage{display:grid;place-items:center}
+    .frame{width:100%;max-width:var(--max);padding:.5rem 1rem 0}
+    figure{margin:0}
+    .image-wrap{position:relative;background:#000;display:grid;place-items:center;border-radius:.8rem;overflow:hidden}
+    img#slide{display:block;width:100%;height:auto;max-height:calc(100vh - 220px);object-fit:contain}
+    .overlay-controls{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+    .nav-btn{pointer-events:auto;background:rgba(0,0,0,.45);border:none;color:#fff;padding:.7rem .9rem;margin:.4rem;border-radius:.7rem;font-size:1.1rem;cursor:pointer}
+    .nav-btn:hover{background:rgba(0,0,0,.6)}
+    figcaption{margin:.8rem 0 0;line-height:1.5}
+    .caption{font-size:var(--caption)}
+    .meta{display:flex;gap:.8rem;align-items:baseline;color:var(--muted);margin-top:.25rem;flex-wrap:wrap}
+    .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:.5rem;padding:.15rem .45rem;font-size:.9rem}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.08);padding:.15rem .35rem;border-radius:.35rem}
+    .hi-contrast img#slide{filter:contrast(1.1) saturate(1.05)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">GR2 — Grupo <span id="groupName">RD-2</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <a class="btn" href="./index.html">← Volver al índice</a>
+      <a class="btn" id="storyBtn" href="#" target="_blank" rel="noopener">📖 Ver relato</a>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia C&J" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText"></div>
+          <div class="meta" id="metaLine">
+            <span class="chip" id="phase"></span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script>
+    const GROUP_NAME = "RD-2";
+    const PATH_PREFIX = "../images/";
+    const STORY_URL  = "./relatos/RD-2.html";
+    const DATA = [
+  {
+    "id": 13,
+    "fase": "Situación inicial",
+    "descripcion": "El pueblode Cendrlón está en riesgo, va a ser atacado. Las tropas Numambu están llegando y pretenden atacar "
+  },
+  {
+    "id": 18,
+    "fase": "Situación inicial",
+    "descripcion": "Las tropas Numambu consiguen entras al pueblo y comienza la batalla"
+  },
+  {
+    "id": 4,
+    "fase": "Situación inicial",
+    "descripcion": "Ambas tropas están perdiendo soldados el Rey de Cendrilón llamado Fransois consigue liberarse y se encierra en el castillo.\n\n"
+  },
+  {
+    "id": 12,
+    "fase": "Conflicto",
+    "descripcion": " Nos encontramos dentro del castillo en el escondite del Rey que se ha escondido junto a una pequeña parte de su tropa, está muy asustado. \n\n"
+  },
+  {
+    "id": 2,
+    "fase": "Conflicto",
+    "descripcion": "Las tropas Numambu iban en busca del escondite del Rey, hasta que dan con él pero por sueste las tropas enemigas no quieren matar al Rey sino que quieren llegar a un trato. \n"
+  },
+  {
+    "id": 14,
+    "fase": "Conflicto",
+    "descripcion": "Los reyes de ambas tropas Oman y Fransois se reunen para negociar sus intereses\n"
+  },
+  {
+    "id": 15,
+    "fase": "Conflicto",
+    "descripcion": "Llegan a un acuerdo, ambos quieren crear el pueblo de Cendrimambu por tanto acuerdan unir las tropas y ser más fuestes.\n\n"
+  },
+  {
+    "id": 3,
+    "fase": "Desarrollo",
+    "descripcion": "Una vez pactado, empieza la costrucción del poblado y se crean muchas viviendas y espacios públicos además de murallas que protegen al poblado unido de posibles invasiones de otras tropas\n\n"
+  },
+  {
+    "id": 11,
+    "fase": "Desarrollo",
+    "descripcion": "Oman el Rey de Numambu junto a su esposa conciben a su primera hija"
+  },
+  {
+    "id": 1,
+    "fase": "Desarrollo",
+    "descripcion": "El embarazo llega a su término y nace la princesa Cenicienta\n"
+  },
+  {
+    "id": 16,
+    "fase": "Desarrollo",
+    "descripcion": "Es una niña muy querida, sus padres la protegen durante toda su vida, a penas tiene contacto con el mundo exterior\n\n"
+  },
+  {
+    "id": 17,
+    "fase": "Desarrollo",
+    "descripcion": "Pero la niña llega a la adolescencia, habla con su padre para poder salir y conocer el mundo pero este se lo niega porque tiene miedo y quiere seguir protegiendola.\n\n"
+  },
+  {
+    "id": 5,
+    "fase": "Desarrollo",
+    "descripcion": "La princesa muestra su rebeldía y escapa, para ello se une en matrimonio a Fransois, el Rey de Cendrillón. \n\n"
+  },
+  {
+    "id": 10,
+    "fase": "Desarrollo",
+    "descripcion": " La princesa está pasando una mala etapa, ya que está en un matrimonio de conveniencia porque ha utilizado al rey Cendrillón para poder escapar de los brazos de su padre. \n\n"
+  },
+  {
+    "id": 6,
+    "fase": "Desarrollo",
+    "descripcion": "Las tropas del rey Numambu decicen matar al rey Cendrillón y salvar a la princesa Cenicienta porque su padre ha cambiado de opinicón porque sino sabe qu perderá a su hija. Entonces a causa de etsa discusión existe una separación de poblados.\n\n"
+  },
+  {
+    "id": 7,
+    "fase": "Resolución",
+    "descripcion": "La princesa acepta el trato de su padre pero llegan al acuerdo de que al morir Cendrillón será ella la que heredara el trono de su marido. \n"
+  },
+  {
+    "id": 9,
+    "fase": "Resolución",
+    "descripcion": "El padre le concede el trato para poder recuperar la confianza de su hija, pero Oman, el Rey Numambu, no está pasando por su mejor momento de salud por ello la princesa Cenicienta se formtalece y su reino coge más fuerza que el de su padre.\n"
+  },
+  {
+    "id": 8,
+    "fase": "Resolución",
+    "descripcion": "Por tanto la princesa Cenicienta debe cuidar a su padre y consiguen fortalecerse juntos \n"
+  },
+  {
+    "id": 19,
+    "fase": "Situación final",
+    "descripcion": "Entonces ahora la princesa Cenicienta pasa a ser La Reina del poblado Cendrillón y se produce la coronación.\n\n"
+  },
+  {
+    "id": 20,
+    "fase": "Situación final",
+    "descripcion": "Los pueblos continuan claramente diferenciados pero padre fortalecen su relación aunque Cenicienta ha de tormar la decisión de unir ambos pueblos o que estos continuen separados ya que cuando el rey fallezca ella heredará el reino entero. "
+  }
+];
+
+    document.title = `GR2 — ${GROUP_NAME}`;
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const phaseEl = document.getElementById('phase');
+    const metaLine = document.getElementById('metaLine');
+    const counterEl = document.getElementById('counter');
+
+    const storyBtn = document.getElementById('storyBtn');
+    if (!STORY_URL) storyBtn.style.display = 'none'; else storyBtn.href = STORY_URL;
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+    let i = 0, captionScale = 1;
+
+    function show(index){
+      if (index<0 || index>=DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      imgEl.src = srcFor(`${id}.jpg`);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || "";
+      phaseEl.textContent = fase || "";
+      metaLine.style.display = (descripcion || fase) ? "flex" : "none";
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+
+      document.getElementById('prevBtn').disabled = (i===0);
+      document.getElementById('overlayPrev').disabled = (i===0);
+      const atEnd = (i===DATA.length-1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+    function next(){ if (i<DATA.length-1) show(i+1); }
+    function prev(){ if (i>0) show(i-1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    window.addEventListener('keydown', (e)=>{
+      if (e.key==='ArrowRight' || e.key===' ') { e.preventDefault(); next(); }
+      if (e.key==='ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase()==='f') toggleFullscreen();
+      if (e.key==='+') zoom(.1);
+      if (e.key==='-') zoom(-.1);
+    });
+
+    function toggleFullscreen(){
+      const el = document.documentElement;
+      if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.();
+    }
+    document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+
+    function zoom(delta){
+      captionScale = Math.max(0.6, Math.min(2.2, captionScale + delta));
+      captionEl.style.fontSize = `calc(var(--caption) * ${captionScale})`;
+    }
+    document.getElementById('zoomIn').addEventListener('click', ()=>zoom(.1));
+    document.getElementById('zoomOut').addEventListener('click', ()=>zoom(-.1));
+    document.getElementById('contrastBtn').addEventListener('click', ()=>document.body.classList.toggle('hi-contrast'));
+
+    show(0);
+  </script>
+</body>
+</html>
