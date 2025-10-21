@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GR2 — LX-1</title>
+  <style>
+    :root{--bg:#0b0f14;--panel:#111821;--text:#e6edf3;--muted:#9aa4af;--max:1200px;--caption:clamp(18px,2.2vh + .6rem,28px)}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    header{position:sticky;top:0;z-index:10;background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .bar{max-width:var(--max);margin:0 auto;padding:.6rem 1rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+    .title{font-weight:600} .spacer{flex:1}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--text);padding:.45rem .7rem;border-radius:.6rem;cursor:pointer;text-decoration:none}
+    .btn:hover{background:rgba(255,255,255,.12)} .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .stage{display:grid;place-items:center}
+    .frame{width:100%;max-width:var(--max);padding:.5rem 1rem 0}
+    figure{margin:0}
+    .image-wrap{position:relative;background:#000;display:grid;place-items:center;border-radius:.8rem;overflow:hidden}
+    img#slide{display:block;width:100%;height:auto;max-height:calc(100vh - 220px);object-fit:contain}
+    .overlay-controls{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+    .nav-btn{pointer-events:auto;background:rgba(0,0,0,.45);border:none;color:#fff;padding:.7rem .9rem;margin:.4rem;border-radius:.7rem;font-size:1.1rem;cursor:pointer}
+    .nav-btn:hover{background:rgba(0,0,0,.6)}
+    figcaption{margin:.8rem 0 0;line-height:1.5}
+    .caption{font-size:var(--caption)}
+    .meta{display:flex;gap:.8rem;align-items:baseline;color:var(--muted);margin-top:.25rem;flex-wrap:wrap}
+    .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:.5rem;padding:.15rem .45rem;font-size:.9rem}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.08);padding:.15rem .35rem;border-radius:.35rem}
+    .hi-contrast img#slide{filter:contrast(1.1) saturate(1.05)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">GR2 — Grupo <span id="groupName">LX1</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <a class="btn" href="./index.html">← Volver al índice</a>
+      <a class="btn" id="storyBtn" href="#" target="_blank" rel="noopener">📖 Ver relato</a>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia C&J" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText"></div>
+          <div class="meta" id="metaLine">
+            <span class="chip" id="phase"></span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script>
+    const GROUP_NAME = "LX1";
+    const PATH_PREFIX = "../images/";
+    const STORY_URL  = "./relatos/LX1.html";
+    const DATA = [
+  {
+    "id": 1,
+    "fase": "Situación inicial",
+    "descripcion": "Cenicienta está en su cuarto. Se le observa aislada cubierta de motas como simulara ceniza o suciedad. Se le representa de color azul, al igual que las letras del a portada."
+  },
+  {
+    "id": 12,
+    "fase": "Situación inicial",
+    "descripcion": "Se observa como los dos círculos pequeños representan a las hermanastras, quienes se están contagiando de la maldad de su madre."
+  },
+  {
+    "id": 2,
+    "fase": "Situación inicial",
+    "descripcion": "La madrastra y sus hijas representadas, en un círculo grande y dos iguales de menor tamaño, respectivamente. Reciben la visita de 3 carteros de la realeza. \n"
+  },
+  {
+    "id": 3,
+    "fase": "Situación inicial",
+    "descripcion": "La madrastra junto a las hermanastras se ríen de Cenicienta porque ella no va asistir al baile."
+  },
+  {
+    "id": 4,
+    "fase": "Conflicto",
+    "descripcion": "Vemos como los carteros reales esperan en la puerta de la casa junto a las hermanastras, mientras cenicienta se encuentra escondida en la casa. Se observa un pequeño semicírculo en la zona del costado, que podría representar cómo el hada madrina observa la situación desde fuera.\n"
+  },
+  {
+    "id": 5,
+    "fase": "Desarrollo",
+    "descripcion": "Se observa la transformación de cenicienta a través de la magia del hada madrina, que es el círculo con la varita mágica cerca. Esta genera un vestido nuevo que es la espiral naranja, y unos zapatos. Se encuentran en el jardín porque están rodeadas de verde.\n"
+  },
+  {
+    "id": 7,
+    "fase": "Desarrollo",
+    "descripcion": "Se puede ver como Cenicienta con su vestido, representado por una gran espiral, acude a palacio. Rodeada de lujos, se encuentra al triángulo bailando con sus hermanastras.\n"
+  },
+  {
+    "id": 9,
+    "fase": "Desarrollo",
+    "descripcion": " El príncipe se acerca a ella. Tanto los asistentes como las hermanastras se colocan de manera que cenicienta y el príncipe comienzan a bailar.\n"
+  },
+  {
+    "id": 8,
+    "fase": "Desarrollo",
+    "descripcion": "El príncipe es representado con un triángulo, y vemos como cenicienta es envuelta en la espiral naranja que representa su vestido. Juntos protagonizan un baile en el que se encuentran. \n"
+  },
+  {
+    "id": 20,
+    "fase": "Desarrollo",
+    "descripcion": "Sin embargo, llega la media noche y Cenicienta sale corriendo del baile, mientras los guardias reales tratan de retenerla, pues es la joven que el príncipe ha elegido entre tantas candidatas para ser su princesa.\n"
+  },
+  {
+    "id": 6,
+    "fase": "Desarrollo",
+    "descripcion": "Cenicienta huye de palacio perseguida por los guardias reales que intentan detenerla. Aún continúa con los dos zapatos.\n"
+  },
+  {
+    "id": 10,
+    "fase": "Desarrollo",
+    "descripcion": "La escena se oscurece representando el fin del hechizo del hada madrina, el vestido queda atrás, y por tanto la espiral. Pero también su zapato, el cual queda en las escaleras. \n"
+  },
+  {
+    "id": 13,
+    "fase": "Desarrollo",
+    "descripcion": "Al día siguiente, el príncipe recorre el reino con los guardias buscando a la dueña del zapato perdido, que se corresponde con Cenicienta, la joven con la que compartió el baile. Llegan y los reciben la madrastra de Cenicienta y sus hermanastras.\n"
+  },
+  {
+    "id": 14,
+    "fase": "Desarrollo",
+    "descripcion": "El príncipe junto a los guardias entran a la casa y le prueban el zapato a una hermanastra.\n"
+  },
+  {
+    "id": 15,
+    "fase": "Desarrollo",
+    "descripcion": "La otra hermanastra se prueba el zapato. Se observa a cenicienta en un lado con color oscuro y el otro zapato. Esta oscuridad refleja el encierro y la omisión a la que está sometida.\n"
+  },
+  {
+    "id": 11,
+    "fase": "Desarrollo",
+    "descripcion": "Cenicienta parece estar en su cuarto, triste y solitaria, por eso la escena se vuelve oscura.\n"
+  },
+  {
+    "id": 16,
+    "fase": "Resolución",
+    "descripcion": "Esta escena representa cómo Cenicienta sale de su habitación, se observa en el ambiente la suciedad y la oscuridad de su entorno. También se observa cómo la magia del hada madrina está presente en la escena. Se ve cómo el príncipe, acompañado de los guardias, le prueba el zapato a Cenicienta.\n"
+  },
+  {
+    "id": 17,
+    "fase": "Resolución",
+    "descripcion": "El triangulo cambia su postura, arrodillandose ante Cenicienta. Junto a ellos se encuentran los guardias, triángulos de menor tamaño. Y en la oscuridad,, representadas con una mancha negra la cual indica la maldad podemos ver a las hermanastras y a su madre. \n"
+  },
+  {
+    "id": 19,
+    "fase": "Situación final",
+    "descripcion": "Cenicienta se marcha de la casa junto al príncipe y los guardias reales. Por un lado, el hada madrina ejerce su magia ante Cenicienta y vuelve la espiral y le transforma las vestimentas. Por otro lado, la madrastra y las hermanastras están en la casa observando como se marchan llenas de oscuridad transmitiendo su odio.\n"
+  },
+  {
+    "id": 18,
+    "fase": "Situación final",
+    "descripcion": "Finalmente, observamos cómo se fusionan la figura del triángulo que representa al príncipe y la espiral naranja que contiene a cenicienta, representando el final feliz que viven tras saber que era ella la dueña del zapato perdido.\n"
+  }
+];
+
+    document.title = `GR2 — ${GROUP_NAME}`;
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const phaseEl = document.getElementById('phase');
+    const metaLine = document.getElementById('metaLine');
+    const counterEl = document.getElementById('counter');
+
+    const storyBtn = document.getElementById('storyBtn');
+    if (!STORY_URL) storyBtn.style.display = 'none'; else storyBtn.href = STORY_URL;
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+    let i = 0, captionScale = 1;
+
+    function show(index){
+      if (index<0 || index>=DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      imgEl.src = srcFor(`${id}.jpg`);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || "";
+      phaseEl.textContent = fase || "";
+      metaLine.style.display = (descripcion || fase) ? "flex" : "none";
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+
+      document.getElementById('prevBtn').disabled = (i===0);
+      document.getElementById('overlayPrev').disabled = (i===0);
+      const atEnd = (i===DATA.length-1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+    function next(){ if (i<DATA.length-1) show(i+1); }
+    function prev(){ if (i>0) show(i-1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    window.addEventListener('keydown', (e)=>{
+      if (e.key==='ArrowRight' || e.key===' ') { e.preventDefault(); next(); }
+      if (e.key==='ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase()==='f') toggleFullscreen();
+      if (e.key==='+') zoom(.1);
+      if (e.key==='-') zoom(-.1);
+    });
+
+    function toggleFullscreen(){
+      const el = document.documentElement;
+      if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.();
+    }
+    document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+
+    function zoom(delta){
+      captionScale = Math.max(0.6, Math.min(2.2, captionScale + delta));
+      captionEl.style.fontSize = `calc(var(--caption) * ${captionScale})`;
+    }
+    document.getElementById('zoomIn').addEventListener('click', ()=>zoom(.1));
+    document.getElementById('zoomOut').addEventListener('click', ()=>zoom(-.1));
+    document.getElementById('contrastBtn').addEventListener('click', ()=>document.body.classList.toggle('hi-contrast'));
+
+    show(0);
+  </script>
+</body>
+</html>
