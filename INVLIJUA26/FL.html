@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INVLIJUA26 — FL</title>
+  <style>
+    :root { --bg:#0b0f14; --panel:#111821; --text:#e6edf3; --muted:#9aa4af; --max-width:1200px; --caption-size:clamp(18px,2.2vh + 0.6rem,28px); }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans"; display: grid; grid-template-rows: auto 1fr; }
+    header { position: sticky; top: 0; z-index: 10; background: var(--panel); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .bar { max-width: var(--max-width); margin: 0 auto; padding: .6rem 1rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .title { font-weight: 600; letter-spacing: .2px; }
+    .spacer { flex: 1; }
+    .btn { appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:.45rem .7rem; border-radius:.6rem; cursor:pointer; font-size:.95rem; text-decoration:none; }
+    .btn:hover { background:rgba(255,255,255,.12); }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .stage { display:grid; place-items:center; }
+    .frame { width:100%; max-width:var(--max-width); padding:.5rem 1rem 0; }
+    figure { margin:0; }
+    .image-wrap { position:relative; background:#000; display:grid; place-items:center; border-radius:.8rem; overflow:hidden; }
+    img#slide { display:block; width:100%; height:auto; max-height:calc(100vh - 220px); object-fit:contain; image-rendering:auto; }
+    .overlay-controls { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
+    .nav-btn { pointer-events:auto; background:rgba(0,0,0,.45); border:none; color:#fff; padding:.7rem .9rem; margin:.4rem; border-radius:.7rem; font-size:1.1rem; cursor:pointer; }
+    .nav-btn:hover { background:rgba(0,0,0,.6); }
+    figcaption { margin:.8rem 0 0; line-height:1.5; }
+    .caption { font-size: var(--caption-size); }
+    .meta { display:flex; align-items:baseline; gap:.8rem; color:var(--muted); margin-top:.25rem; font-size:.95rem; flex-wrap:wrap; }
+    .chip { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:.5rem; padding:.15rem .45rem; font-size:.9rem; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background: rgba(255,255,255,.08); padding: .15rem .35rem; border-radius: .35rem; }
+    .hi-contrast img#slide { filter: contrast(1.1) saturate(1.05); }
+    @media (max-height: 700px) { img#slide { max-height: calc(100vh - 190px); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">INVLIJUA26 — Grupo <span id="groupName">FL</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <a class="btn" href="./index.html" title="Volver al índice">← Volver al índice</a>
+      <a class="btn" id="storyBtn" href="./relatos/FL.html" target="_blank" rel="noopener">📖 Ver relato</a>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia FL" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText">Descripción de la secuencia…</div>
+          <div class="meta">
+            <span class="chip" id="phase">—</span>
+            <span>Posición original: <span id="originalPos">—</span></span>
+            <span>•</span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script>
+    const GROUP_NAME = "FL";
+    const PATH_PREFIX = "../images-secuencia/";
+
+    const DATA = [
+      { id: 1, fase: "Situación inicial", descripcion: "Érase una vez, una joven llamada Cenicienta, triste, encerrada en su habitación. Vivía con su malvada madrastra y sus dos hermanastras." },
+      { id: 12, fase: "Situación inicial", descripcion: "Un día, la madrastra recibió la noticia de que el Rey organizaba una fiesta para encontrar esposa a su hijo, y habían sido invitadas. La madrastra comunica la noticia a sus dos hijas, dejando a Cenicienta excluida." },
+      { id: 2, fase: "Situación inicial", descripcion: "El Rey envía a tres súbditos reales a recoger a las invitadas para llevarlas al palacio real, donde se celebrará el baile." },
+      { id: 3, fase: "Conflicto", descripcion: "Las hermanastras y la malvada madrastra llegan al palacio real, vestidas con sus mejores galas y ornamentadas con las más valiosas joyas, mientras Cenicienta, por su parte, se quedaba en casa sola y desolada." },
+      { id: 5, fase: "Conflicto", descripcion: "Sin embargo, todo estaba a punto de cambiar. La magia llegaría de la mano del hada madrina, para ofrecer a Cenicienta el más espectacular de los vestidos, y los dos mejores zapatos de todo el baile, ambos de cristal." },
+      { id: 7, fase: "Desarrollo", descripcion: "Cenicienta llega al baile ante la estupefacción de sus hermanastras que se encontraban cortejando al príncipe en busca de su amor." },
+      { id: 9, fase: "Desarrollo", descripcion: "El príncipe, al ver a Cenicienta, centró toda su atención en la hermosa joven y ambos se fundieron en un romántico baile." },
+      { id: 8, fase: "Desarrollo", descripcion: "Cenicienta y el príncipe disfrutan de la tan esperada velada, bailando al compás de la música y enamorándose al mismo tiempo que sonaban las notas." },
+      { id: 19, fase: "Desarrollo", descripcion: "El príncipe y Cenicienta siguen bailando, ya enamorados, ante la atenta y furiosa mirada de sus hermanas y de su madrastra, así como del resto de mujeres allí presentes en el evento." },
+      { id: 20, fase: "Desarrollo", descripcion: "Ya son las 12 de la noche. El hechizo del hada madrina está llegando a su fin, por lo que Cenicienta huye despavorida ante la atenta y confusa mirada del príncipe." },
+      { id: 6, fase: "Desarrollo", descripcion: "Cenicienta corre intentando que el príncipe no consiga llegar a ver quién es en realidad, y el hechizo va desapareciendo con el paso de los segundos." },
+      { id: 10, fase: "Desarrollo", descripcion: "Fruto de las prisas, Cenicienta pierde por el camino uno de sus zapatos de cristal, que será encontrado más adelante por el príncipe." },
+      { id: 11, fase: "Desarrollo", descripcion: "Ya sin el poder de la magia, Cenicienta regresa a su cruda realidad, vivir encerrada y solitaria en su habitación, con el recuerdo de uno de los zapatos de cristal que le acompañaron en el baile." },
+      { id: 4, fase: "Resolución", descripcion: "Las hermanastras llegan también a su casa, con la noticia de que el Príncipe va en búsqueda de la legítima dueña del zapato que encontró." },
+      { id: 15, fase: "Resolución", descripcion: "El Príncipe llega a casa de las hermanastras y de Cenicienta, y prueba el zapato a la primera de las hermanastras, sin éxito en absoluto." },
+      { id: 14, fase: "Resolución", descripcion: "La segunda hermanastra también se prueba el zapato, corriendo con la misma suerte que la primera hermanastra." },
+      { id: 13, fase: "Resolución", descripcion: "Las hermanastras desaparecen totalmente tristes y enfadadas de la escena, y el Príncipe, totalmente resignado, empieza a pensar que nunca encontrará a la verdadera dueña del zapato." },
+      { id: 18, fase: "Resolución", descripcion: "Como un rayo de esperanza, Cenicienta aparece en busca del Príncipe del que se enamoró, y con la intención de probarse su zapato y demostrar que ella es realmente la dueña del mismo." },
+      { id: 16, fase: "Situación final", descripcion: "De esta manera, el Príncipe entrega el zapato a Cenicienta para que se lo pruebe, ante la furiosa mirada de sus hermanastras y madrastra allí presentes." },
+      { id: 17, fase: "Situación final", descripcion: "El zapato encaja perfectamente en el pie de Cenicienta, hecho que desata la alegría total de ambos enamorados, y la furia total de las hermanastras y la madrastra." }
+    ];
+
+    document.title = `INVLIJUA26 — ${GROUP_NAME}`;
+    document.getElementById('groupName').textContent = GROUP_NAME;
+
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const counterEl = document.getElementById('counter');
+    const phaseEl = document.getElementById('phase');
+    const originalPosEl = document.getElementById('originalPos');
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+    let i = 0;
+    let captionScale = 1;
+
+    function show(index) {
+      if (index < 0 || index >= DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      const file = `${id}.jpg`;
+      imgEl.src = srcFor(file);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || '';
+      phaseEl.textContent = fase || '—';
+      originalPosEl.textContent = id;
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+
+      document.getElementById('prevBtn').disabled = (i === 0);
+      document.getElementById('overlayPrev').disabled = (i === 0);
+      const atEnd = (i === DATA.length - 1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+
+    function next() { if (i < DATA.length - 1) show(i + 1); }
+    function prev() { if (i > 0) show(i - 1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase() === 'f') { toggleFullscreen(); }
+      if (e.key === '+') { zoomCaption(0.1); }
+      if (e.key === '-') { zoomCaption(-0.1); }
+    });
+
+    const fsBtn = document.getElementById('fsBtn');
+    fsBtn.addEventListener('click', toggleFullscreen);
+    function toggleFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) { elem.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+
+    function setCaptionScale(scale) {
+      captionScale = Math.max(0.6, Math.min(scale, 2.2));
+      captionEl.style.fontSize = `calc(var(--caption-size) * ${captionScale})`;
+    }
+    function zoomCaption(delta) { setCaptionScale(captionScale + delta); }
+    document.getElementById('zoomIn').addEventListener('click', () => zoomCaption(0.1));
+    document.getElementById('zoomOut').addEventListener('click', () => zoomCaption(-0.1));
+
+    document.getElementById('contrastBtn').addEventListener('click', () => document.body.classList.toggle('hi-contrast'));
+
+    show(0);
+  </script>
+</body>
+</html>
