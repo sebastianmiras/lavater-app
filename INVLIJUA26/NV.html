@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INVLIJUA26 — NV</title>
+  <style>
+    :root { --bg:#0b0f14; --panel:#111821; --text:#e6edf3; --muted:#9aa4af; --max-width:1200px; --caption-size:clamp(18px,2.2vh + 0.6rem,28px); }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans"; display: grid; grid-template-rows: auto 1fr; }
+    header { position: sticky; top: 0; z-index: 10; background: var(--panel); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .bar { max-width: var(--max-width); margin: 0 auto; padding: .6rem 1rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .title { font-weight: 600; letter-spacing: .2px; }
+    .spacer { flex: 1; }
+    .btn { appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:.45rem .7rem; border-radius:.6rem; cursor:pointer; font-size:.95rem; text-decoration:none; }
+    .btn:hover { background:rgba(255,255,255,.12); }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .stage { display:grid; place-items:center; }
+    .frame { width:100%; max-width:var(--max-width); padding:.5rem 1rem 0; }
+    figure { margin:0; }
+    .image-wrap { position:relative; background:#000; display:grid; place-items:center; border-radius:.8rem; overflow:hidden; }
+    img#slide { display:block; width:100%; height:auto; max-height:calc(100vh - 220px); object-fit:contain; image-rendering:auto; }
+    .overlay-controls { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
+    .nav-btn { pointer-events:auto; background:rgba(0,0,0,.45); border:none; color:#fff; padding:.7rem .9rem; margin:.4rem; border-radius:.7rem; font-size:1.1rem; cursor:pointer; }
+    .nav-btn:hover { background:rgba(0,0,0,.6); }
+    figcaption { margin:.8rem 0 0; line-height:1.5; }
+    .caption { font-size: var(--caption-size); }
+    .meta { display:flex; align-items:baseline; gap:.8rem; color:var(--muted); margin-top:.25rem; font-size:.95rem; flex-wrap:wrap; }
+    .chip { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:.5rem; padding:.15rem .45rem; font-size:.9rem; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background: rgba(255,255,255,.08); padding: .15rem .35rem; border-radius: .35rem; }
+    .hi-contrast img#slide { filter: contrast(1.1) saturate(1.05); }
+    @media (max-height: 700px) { img#slide { max-height: calc(100vh - 190px); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">INVLIJUA26 — Grupo <span id="groupName">NV</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <a class="btn" href="./index.html" title="Volver al índice">← Volver al índice</a>
+      <a class="btn" id="storyBtn" href="./relatos/NV.html" target="_blank" rel="noopener">📖 Ver relato</a>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia NV" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText">Descripción de la secuencia…</div>
+          <div class="meta">
+            <span class="chip" id="phase">—</span>
+            <span>Posición original: <span id="originalPos">—</span></span>
+            <span>•</span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script>
+    const GROUP_NAME = "NV";
+    const PATH_PREFIX = "../images-secuencia/";
+
+    const DATA = [
+      { id: 2, fase: "Situación inicial", descripcion: "La madrastra y las dos hermanastras de Cenicienta están en casa y llegan los guardias reales a entregar las invitaciones para el baile." },
+      { id: 3, fase: "Situación inicial", descripcion: "Las hermanastras se preparan para irse al baile, y la madrastra le dice a Cenicienta que no puede ir." },
+      { id: 4, fase: "Situación inicial", descripcion: "Las hermanastras se van al baile con los guardias reales y Cenicienta se queda en casa." },
+      { id: 1, fase: "Situación inicial", descripcion: "Cenicienta está sola, triste y aislada en casa." },
+      { id: 5, fase: "Conflicto", descripcion: "Aparece la hada madrina que con sus poderes mágicos y su varita hace un hechizo y le hace un vestido y unos zapatos preciosos para ir al baile." },
+      { id: 6, fase: "Conflicto", descripcion: "Cenicienta llega nerviosa a la entrada del baile, donde están los guardias, y sube las escaleras para entrar al palacio." },
+      { id: 7, fase: "Conflicto", descripcion: "Cenicienta entra al salón del baile, y todo el mundo le mira, las hermanastras están con el príncipe." },
+      { id: 8, fase: "Conflicto", descripcion: "El príncipe ve a Cenicienta, con su vestido, se enamora, y le pide un baile." },
+      { id: 9, fase: "Conflicto", descripcion: "El príncipe y Cenicienta bailan mientras que los demás, los reyes y el resto de invitados, observan el baile." },
+      { id: 19, fase: "Conflicto", descripcion: "El príncipe y Cenicienta salen al jardín del palacio para conversar, y el príncipe intenta averiguar quién es ella." },
+      { id: 10, fase: "Conflicto", descripcion: "Son las 00:00, el hechizo está a punto de romperse, y Cenicienta se va corriendo, y en el camino se le cae un zapato en la escalera." },
+      { id: 20, fase: "Conflicto", descripcion: "El príncipe va tras ella, pero ella sigue corriendo y él ve cómo huye hacia el bosque, y se queda con el zapato que ha perdido." },
+      { id: 11, fase: "Desarrollo", descripcion: "Cenicienta llega a casa con un zapato, está muy triste y se queda sola llorando." },
+      { id: 12, fase: "Desarrollo", descripcion: "Llegan las hermanastras del baile sin éxito porque no han conquistado al príncipe, y la madre se enfada con ellas por ello." },
+      { id: 13, fase: "Desarrollo", descripcion: "El príncipe va en busca de la princesa y llega a casa de Cenicienta, donde están la madrastra y hermanastras viéndolo." },
+      { id: 15, fase: "Desarrollo", descripcion: "Una de las hermanastras se prueba el zapato, pero no es de su talla, mientras cenicienta escondida lo observa todo." },
+      { id: 14, fase: "Desarrollo", descripcion: "La otra hermanastra se prueba el zapato, pero tampoco le cabe, ninguna de las dos es la chica que busca el príncipe." },
+      { id: 16, fase: "Resolución", descripcion: "Cenicienta sale con el otro zapato, y el príncipe al verla desea probarle el zapato." },
+      { id: 17, fase: "Resolución", descripcion: "Cuando se lo prueba, descubre que le queda a su medida exacta, y descubre que es la chica de la que se enamoró en el baile." },
+      { id: 18, fase: "Situación final", descripcion: "El príncipe y Cenicienta se van juntos, mientras que la madrastra y las hermanastras ven todo enfadadas y con rabia." }
+    ];
+
+    document.title = `INVLIJUA26 — ${GROUP_NAME}`;
+    document.getElementById('groupName').textContent = GROUP_NAME;
+
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const counterEl = document.getElementById('counter');
+    const phaseEl = document.getElementById('phase');
+    const originalPosEl = document.getElementById('originalPos');
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+    let i = 0;
+    let captionScale = 1;
+
+    function show(index) {
+      if (index < 0 || index >= DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      const file = `${id}.jpg`;
+      imgEl.src = srcFor(file);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || '';
+      phaseEl.textContent = fase || '—';
+      originalPosEl.textContent = id;
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+
+      document.getElementById('prevBtn').disabled = (i === 0);
+      document.getElementById('overlayPrev').disabled = (i === 0);
+      const atEnd = (i === DATA.length - 1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+
+    function next() { if (i < DATA.length - 1) show(i + 1); }
+    function prev() { if (i > 0) show(i - 1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase() === 'f') { toggleFullscreen(); }
+      if (e.key === '+') { zoomCaption(0.1); }
+      if (e.key === '-') { zoomCaption(-0.1); }
+    });
+
+    const fsBtn = document.getElementById('fsBtn');
+    fsBtn.addEventListener('click', toggleFullscreen);
+    function toggleFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) { elem.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+
+    function setCaptionScale(scale) {
+      captionScale = Math.max(0.6, Math.min(scale, 2.2));
+      captionEl.style.fontSize = `calc(var(--caption-size) * ${captionScale})`;
+    }
+    function zoomCaption(delta) { setCaptionScale(captionScale + delta); }
+    document.getElementById('zoomIn').addEventListener('click', () => zoomCaption(0.1));
+    document.getElementById('zoomOut').addEventListener('click', () => zoomCaption(-0.1));
+
+    document.getElementById('contrastBtn').addEventListener('click', () => document.body.classList.toggle('hi-contrast'));
+
+    show(0);
+  </script>
+</body>
+</html>
