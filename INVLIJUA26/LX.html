@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INVLIJUA26 — LX</title>
+  <style>
+    :root { --bg:#0b0f14; --panel:#111821; --text:#e6edf3; --muted:#9aa4af; --max-width:1200px; --caption-size:clamp(18px,2.2vh + 0.6rem,28px); }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans"; display: grid; grid-template-rows: auto 1fr; }
+    header { position: sticky; top: 0; z-index: 10; background: var(--panel); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .bar { max-width: var(--max-width); margin: 0 auto; padding: .6rem 1rem; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .title { font-weight: 600; letter-spacing: .2px; }
+    .spacer { flex: 1; }
+    .btn { appearance:none; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--text); padding:.45rem .7rem; border-radius:.6rem; cursor:pointer; font-size:.95rem; text-decoration:none; }
+    .btn:hover { background:rgba(255,255,255,.12); }
+    .btn:active { transform: translateY(1px); }
+    .btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .stage { display:grid; place-items:center; }
+    .frame { width:100%; max-width:var(--max-width); padding:.5rem 1rem 0; }
+    figure { margin:0; }
+    .image-wrap { position:relative; background:#000; display:grid; place-items:center; border-radius:.8rem; overflow:hidden; }
+    img#slide { display:block; width:100%; height:auto; max-height:calc(100vh - 220px); object-fit:contain; image-rendering:auto; }
+    .overlay-controls { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
+    .nav-btn { pointer-events:auto; background:rgba(0,0,0,.45); border:none; color:#fff; padding:.7rem .9rem; margin:.4rem; border-radius:.7rem; font-size:1.1rem; cursor:pointer; }
+    .nav-btn:hover { background:rgba(0,0,0,.6); }
+    figcaption { margin:.8rem 0 0; line-height:1.5; }
+    .caption { font-size: var(--caption-size); }
+    .meta { display:flex; align-items:baseline; gap:.8rem; color:var(--muted); margin-top:.25rem; font-size:.95rem; flex-wrap:wrap; }
+    .chip { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:.5rem; padding:.15rem .45rem; font-size:.9rem; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background: rgba(255,255,255,.08); padding: .15rem .35rem; border-radius: .35rem; }
+    .hi-contrast img#slide { filter: contrast(1.1) saturate(1.05); }
+    @media (max-height: 700px) { img#slide { max-height: calc(100vh - 190px); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="title">INVLIJUA26 — Grupo <span id="groupName">LX</span></div>
+      <div id="counter">1 / 20</div>
+      <div class="spacer"></div>
+      <a class="btn" href="./index.html" title="Volver al índice">← Volver al índice</a>
+      <a class="btn" id="storyBtn" href="./relatos/LX.html" target="_blank" rel="noopener">📖 Ver relato</a>
+      <button class="btn" id="prevBtn" title="Anterior (←)">◀</button>
+      <button class="btn" id="nextBtn" title="Siguiente (→ o clic)">▶</button>
+      <button class="btn" id="fsBtn" title="Pantalla completa (F)">⤢ Pantalla completa</button>
+      <button class="btn" id="zoomIn">A+</button>
+      <button class="btn" id="zoomOut">A−</button>
+      <button class="btn" id="contrastBtn" title="Alto contraste">Alto contraste</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="frame">
+      <figure>
+        <div class="image-wrap">
+          <img id="slide" src="" alt="Secuencia LX" />
+          <div class="overlay-controls">
+            <button class="nav-btn" id="overlayPrev" aria-label="Anterior">◀</button>
+            <button class="nav-btn" id="overlayNext" aria-label="Siguiente">▶</button>
+          </div>
+        </div>
+        <figcaption>
+          <div class="caption" id="captionText">Descripción de la secuencia…</div>
+          <div class="meta">
+            <span class="chip" id="phase">—</span>
+            <span>Posición original: <span id="originalPos">—</span></span>
+            <span>•</span>
+            <span>Avanza con <span class="kbd">→</span>, <span class="kbd">Espacio</span> o clic</span>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <script>
+    const GROUP_NAME = "LX";
+    const PATH_PREFIX = "../images-secuencia/";
+
+    const DATA = [
+      { id: 2, fase: "Situación inicial", descripcion: "Aparece la madrastra y las hermanastras con los sirvientes del príncipe, quienes les informan de que va a haber un baile. Tono alegre" },
+      { id: 1, fase: "Situación inicial", descripcion: "Cenicienta sola y triste en el sótano." },
+      { id: 3, fase: "Situación inicial", descripcion: "Cenicienta ayuda a las hermanas a arreglarse para el baile. Ella está triste porque no va." },
+      { id: 4, fase: "Situación inicial", descripcion: "Las hermanas de camino al baile y Cenicienta se queda en casa." },
+      { id: 5, fase: "Desarrollo", descripcion: "Cenicienta sale al jardín y se encuentra al hada madrina. Realiza un hechizo, hace un carruaje y viste y calza a Cenicienta" },
+      { id: 7, fase: "Desarrollo", descripcion: "Cenicienta está llegando al baile con el carruaje. Las hermanas ya estan en la fiesta disfrutando con el príncipe." },
+      { id: 19, fase: "Desarrollo", descripcion: "Cenicienta ha llegado el baile. El príncipe y ella se conocen y bailan juntos." },
+      { id: 10, fase: "Conflicto", descripcion: "Se empieza a romper el hechizo. Cenicienta sale corriendo y pierde un zapato en la escalera." },
+      { id: 9, fase: "Desarrollo", descripcion: "Cenicienta se aleja con el carruaje del castillo." },
+      { id: 8, fase: "Desarrollo", descripcion: "El príncipe va tras ella." },
+      { id: 6, fase: "Desarrollo", descripcion: "Sus lacayos van detrás de ella." },
+      { id: 20, fase: "Desarrollo", descripcion: "Todo el reino busca a la Cenicienta." },
+      { id: 13, fase: "Desarrollo", descripcion: "Aparece el príncipe junto a sus lacayos camino a casa de la madrasta con el zapato que se han encontrado." },
+      { id: 12, fase: "Desarrollo", descripcion: "La madrastra, muy enfadada, les dice que tiene que todo lo posible para que les quepa el zapato." },
+      { id: 11, fase: "Desarrollo", descripcion: "Cenicienta se encuentra encerrada con el zapato que le queda." },
+      { id: 14, fase: "Resolución", descripcion: "El príncipe le prueba el zapato a una de las madrastras. Cenicienta sigue encerrada con el otro zapato." },
+      { id: 15, fase: "Resolución", descripcion: "El príncipe le prueba el zapato a la otra hermanastra. Cenicienta esta encerrada con el otro zapato." },
+      { id: 16, fase: "Resolución", descripcion: "El príncipe le prueba el zapato a la Cenicienta. Ella esta muy emociona. Las hermanastras y la madrastra estan muy enfadadas." },
+      { id: 17, fase: "Situación final", descripcion: "El príncipe anuncia que ha encontrado a la chica. Las otras rabian." },
+      { id: 18, fase: "Situación final", descripcion: "Finalmente, la Cenicienta junto al príncipe se dirigen a palacio, dejando atrás a la madrastra y hermanastras" }
+    ];
+
+    document.title = `INVLIJUA26 — ${GROUP_NAME}`;
+    document.getElementById('groupName').textContent = GROUP_NAME;
+
+    const imgEl = document.getElementById('slide');
+    const captionEl = document.getElementById('captionText');
+    const counterEl = document.getElementById('counter');
+    const phaseEl = document.getElementById('phase');
+    const originalPosEl = document.getElementById('originalPos');
+
+    const srcFor = (file) => PATH_PREFIX + encodeURIComponent(file);
+
+    let i = 0;
+    let captionScale = 1;
+
+    function show(index) {
+      if (index < 0 || index >= DATA.length) return;
+      i = index;
+      const { id, descripcion, fase } = DATA[i];
+      const file = `${id}.jpg`;
+      imgEl.src = srcFor(file);
+      imgEl.alt = `Secuencia ${i+1} de ${DATA.length}`;
+      captionEl.textContent = descripcion || '';
+      phaseEl.textContent = fase || '—';
+      originalPosEl.textContent = id;
+      counterEl.textContent = `${i+1} / ${DATA.length}`;
+
+      document.getElementById('prevBtn').disabled = (i === 0);
+      document.getElementById('overlayPrev').disabled = (i === 0);
+      const atEnd = (i === DATA.length - 1);
+      document.getElementById('nextBtn').disabled = atEnd;
+      document.getElementById('overlayNext').disabled = atEnd;
+    }
+
+    function next() { if (i < DATA.length - 1) show(i + 1); }
+    function prev() { if (i > 0) show(i - 1); }
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+    document.getElementById('prevBtn').addEventListener('click', prev);
+    document.getElementById('overlayNext').addEventListener('click', next);
+    document.getElementById('overlayPrev').addEventListener('click', prev);
+    imgEl.addEventListener('click', next);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key.toLowerCase() === 'f') { toggleFullscreen(); }
+      if (e.key === '+') { zoomCaption(0.1); }
+      if (e.key === '-') { zoomCaption(-0.1); }
+    });
+
+    const fsBtn = document.getElementById('fsBtn');
+    fsBtn.addEventListener('click', toggleFullscreen);
+    function toggleFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) { elem.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+
+    function setCaptionScale(scale) {
+      captionScale = Math.max(0.6, Math.min(scale, 2.2));
+      captionEl.style.fontSize = `calc(var(--caption-size) * ${captionScale})`;
+    }
+    function zoomCaption(delta) { setCaptionScale(captionScale + delta); }
+    document.getElementById('zoomIn').addEventListener('click', () => zoomCaption(0.1));
+    document.getElementById('zoomOut').addEventListener('click', () => zoomCaption(-0.1));
+
+    document.getElementById('contrastBtn').addEventListener('click', () => document.body.classList.toggle('hi-contrast'));
+
+    show(0);
+  </script>
+</body>
+</html>
